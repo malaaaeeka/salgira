@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #86465e;
+            color: #757479;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(12, 12, 12, 0.015);
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 600px; /* Reduced from 800px */
+            margin: auto;
+        }
+
+        .piano {
+            display: flex;
+            justify-content: center;
+            position: relative;
+            margin: 15px 0; /* Reduced from 20px */
+            overflow-x: auto;
+            padding: 8px 0; /* Reduced from 10px */
+            min-width: 100%;
+        }
+
+        .piano-wrapper {
+            display: flex;
+            position: relative;
+            min-width: 480px; /* Reduced from 650px */
+        }
+
+        .key {
+            flex: 1;
+            min-width: 32px; /* Reduced from 45px */
+            height: 85px; /* Reduced from 120px */
+            background: white;
+            border: 1px solid #bbb;
+            margin: 0 1px;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 4px; /* Reduced from 5px */
+            touch-action: manipulation;
+        }
+
+        .key:active {
+            background: #a57a8a;
+        }
+
+        .black-key {
+            width: 22px; /* Reduced from 30px */
+            height: 55px; /* Reduced from 80px */
+            background: rgb(0, 0, 0);
+            position: absolute;
+            z-index: 2;
+            cursor: pointer;
+            color: #fff;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 4px; /* Reduced from 5px */
+            font-size: 10px; /* Reduced from 12px */
+            touch-action: manipulation;
+        }
+
+        .black-key:active {
+            background: #a57a8a;
+        }
+
+        .label {
+            color: rgb(22, 9, 27);
+            font-size: 12px; /* Reduced from 14px */
+            font-weight: bold;
+        }
+
+        .correct {
+            color: rgb(34, 14, 39);
+            font-weight: bold;
+        }
+
+        .star {
+            position: fixed;
+            width: 2px;
+            height: 2px;
+            background: #fff;
+            border-radius: 50%;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        .music-note {
+            position: fixed;
+            font-size: 20px; /* Reduced from 24px */
+            color: #86465e;
+            pointer-events: none;
+            animation: floatAndFade 2s ease-out forwards;
+            z-index: 3;
+        }
+
+        @keyframes floatAndFade {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--translateX), -100px) rotate(var(--rotation));
+            }
+        }
+
+        .top-text h1 {
+            position: absolute;
+            top: -50px; /* Reduced from -60px */
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(16px, 3.5vw, 24px); /* Reduced max size */
+            color: rgb(255, 251, 254);
+            font-weight: bold;
+            z-index: 2;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .top-text p {
+            position: absolute;
+            top: -25px; /* Reduced from -30px */
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(10px, 2vw, 13px); /* Reduced max size */
+            color: rgb(255, 255, 255);
+            font-weight: bold;
+            z-index: 2;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        button {
+            background: #000000;
+            color: #fff;
+            border: none;
+            padding: 0.6rem 1.2rem; /* Reduced from 0.75rem 1.5rem */
+            border-radius: 25px; /* Reduced from 30px */
+            font-size: 0.9rem; /* Reduced from 1rem */
+            font-weight: bold;
+            cursor: pointer;
+            margin: 8px 0; /* Reduced from 10px */
+            min-height: 40px; /* Reduced from 44px */
+            touch-action: manipulation;
+        }
+
+        button:hover {
+            background: #86465e;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        #message {
+            margin-top: 8px; /* Reduced from 10px */
+            font-size: 14px; /* Reduced from 16px */
+            min-height: 18px; /* Reduced from 20px */
+        }
+
+        /* Mobile devices */
+        @media (max-width: 480px) {
+            body {
+                padding: 3px;
+                min-height: 100vh;
+            }
+
+            .container {
+                padding: 0.4rem;
+                margin: 5px 0;
+                max-width: 96%;
+            }
+
+            .piano {
+                margin: 6px 0;
+                padding: 3px 0;
+            }
+
+            .piano-wrapper {
+                min-width: 320px;
+            }
+
+            .key {
+                min-width: 24px;
+                height: 50px; /* Much shorter for mobile */
+            }
+
+            .black-key {
+                width: 16px;
+                height: 32px; /* Much shorter for mobile */
+                font-size: 8px;
+            }
+
+            .label {
+                font-size: 9px;
+            }
+
+            .top-text h1 {
+                top: -30px;
+                font-size: 14px;
+            }
+
+            .top-text p {
+                top: -15px;
+                font-size: 9px;
+            }
+
+            button {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.75rem;
+                min-height: 32px;
+            }
+
+            .music-note {
+                font-size: 14px;
+            }
+
+            /* Adjust black key positions for mobile */
+            .black-key:nth-child(12) { left: 17px !important; }
+            .black-key:nth-child(13) { left: 42px !important; }
+            .black-key:nth-child(14) { left: 67px !important; }
+            .black-key:nth-child(15) { left: 92px !important; }
+            .black-key:nth-child(16) { left: 117px !important; }
+            .black-key:nth-child(17) { left: 142px !important; }
+            .black-key:nth-child(18) { left: 167px !important; }
+            .black-key:nth-child(19) { left: 192px !important; }
+            .black-key:nth-child(20) { left: 217px !important; }
+            .black-key:nth-child(21) { left: 242px !important; }
+            .black-key:nth-child(22) { left: 267px !important; }
+            .black-key:nth-child(23) { left: 292px !important; }
+            .black-key:nth-child(24) { left: 317px !important; }
+        }
+
+        /* Very small mobile devices */
+        @media (max-width: 360px) {
+            body {
+                padding: 2px;
+            }
+
+            .container {
+                padding: 0.3rem;
+                margin: 3px 0;
+            }
+
+            .piano {
+                margin: 4px 0;
+                padding: 2px 0;
+            }
+
+            .piano-wrapper {
+                min-width: 280px;
+            }
+
+            .key {
+                min-width: 22px;
+                height: 45px;
+            }
+
+            .black-key {
+                width: 14px;
+                height: 28px;
+                font-size: 7px;
+            }
+
+            button {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.7rem;
+                min-height: 28px;
+            }
+
+            /* Adjust black key positions for very small mobile */
+            .black-key:nth-child(12) { left: 15px !important; }
+            .black-key:nth-child(13) { left: 38px !important; }
+            .black-key:nth-child(14) { left: 61px !important; }
+            .black-key:nth-child(15) { left: 84px !important; }
+            .black-key:nth-child(16) { left: 107px !important; }
+            .black-key:nth-child(17) { left: 130px !important; }
+            .black-key:nth-child(18) { left: 153px !important; }
+            .black-key:nth-child(19) { left: 176px !important; }
+            .black-key:nth-child(20) { left: 199px !important; }
+            .black-key:nth-child(21) { left: 222px !important; }
+            .black-key:nth-child(22) { left: 245px !important; }
+            .black-key:nth-child(23) { left: 268px !important; }
+            .black-key:nth-child(24) { left: 291px !important; }
+        }
+
+        /* Tablets */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .container {
+                padding: 1.2rem; /* Reduced from 1.5rem */
+                max-width: 85%; /* Reduced from 90% */
+            }
+
+            .piano-wrapper {
+                min-width: 420px; /* Reduced from 600px */
+            }
+
+            .key {
+                min-width: 28px; /* Reduced from 40px */
+                height: 75px; /* Reduced from 110px */
+            }
+
+            .black-key {
+                width: 20px; /* Reduced from 28px */
+                height: 50px; /* Reduced from 70px */
+            }
+        }
+
+        /* Laptops and larger tablets */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                padding: 1.5rem; /* Reduced from 2rem */
+                max-width: 75%; /* Reduced from 85% */
+            }
+
+            .piano-wrapper {
+                min-width: 480px; /* Reduced from 650px */
+            }
+        }
+
+        /* Desktop */
+        @media (min-width: 1025px) {
+            .container {
+                padding: 2rem; /* Reduced from 2.5rem */
+                max-width: 600px; /* Reduced from 800px */
+            }
+
+            .key {
+                min-width: 36px; /* Reduced from 50px */
+                height: 100px; /* Reduced from 150px */
+            }
+
+            .black-key {
+                width: 24px; /* Reduced from 30px */
+                height: 65px; /* Reduced from 100px */
+            }
+
+            .label {
+                font-size: 14px; /* Reduced from 16px */
+            }
+        }
+
+        /* Landscape orientation adjustments */
+        @media (orientation: landscape) and (max-height: 500px) {
+            body {
+                padding: 2px;
+            }
+
+            .container {
+                margin: 2px auto;
+                padding: 0.3rem;
+            }
+
+            .key {
+                height: 35px;
+            }
+
+            .black-key {
+                height: 22px;
+            }
+
+            .top-text h1 {
+                top: -25px;
+                font-size: 12px;
+            }
+
+            .top-text p {
+                top: -12px;
+                font-size: 8px;
+            }
+
+            button {
+                padding: 0.2rem 0.6rem;
+                font-size: 0.65rem;
+                min-height: 24px;
+            }
+        }
+
+        /* Very short landscape screens (phones in landscape) */
+        @media (orientation: landscape) and (max-height: 400px) {
+            .key {
+                height: 30px;
+            }
+
+            .black-key {
+                height: 18px;
+                font-size: 6px;
+            }
+
+            .container {
+                padding: 0.2rem;
+            }
+
+            .piano {
+                margin: 2px 0;
+                padding: 1px 0;
+            }
+        }
+
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .star {
+                width: 1px;
+                height: 1px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- <div class="top-text">
+            <h1>Enter The Password</h1>
+            <p>h a 1 4 f g i e j 9 k l 10 d</p>
+        </div> -->
+        
+        <h1></h1>
+        <div class="piano" id="piano">
+            <div class="piano-wrapper">
+                <!-- White keys -->
+                <div class="key" data-note="7.mp3" data-char="7"><div class="label">7</div></div>
+                <div class="key" data-note="8.mp3" data-char="8"><div class="label">8</div></div>
+                <div class="key" data-note="11.mp3" data-char="11"><div class="label">11</div></div>
+                <div class="key" data-note="12.mp3" data-char="12"><div class="label">12</div></div>
+                <div class="key" data-note="2.mp3" data-char="2"><div class="label">2</div></div>
+                <div class="key" data-note="1.mp3" data-char="1"><div class="label">1</div></div>
+                <div class="key" data-note="4.mp3" data-char="c"><div class="label">c</div></div>
+                <div class="key" data-note="5.mp3" data-char="5"><div class="label">5</div></div>
+                <div class="key" data-note="13.mp3" data-char="13"><div class="label">13</div></div>
+                <div class="key" data-note="15.mp3" data-char="15"><div class="label">15</div></div>
+                <div class="key" data-note="17.mp3" data-char="17"><div class="label">17</div></div>
+                
+                <!-- Black keys with calculated positions (adjusted for smaller piano) -->
+                <div class="black-key" style="left: 23px;" data-note="9.mp3" data-char="9">9</div> 
+                <div class="black-key" style="left: 56px;" data-note="10.mp3" data-char="10">10</div>
+                <div class="black-key" style="left: 89px;" data-note="" data-char="a">a</div>
+                <div class="black-key" style="left: 122px;" data-note="4.mp3" data-char="4">4</div>
+                <div class="black-key" style="left: 155px;" data-note="3.mp3" data-char="3">3</div>
+                <div class="black-key" style="left: 188px;" data-note="6.mp3" data-char="6">6</div>
+                <div class="black-key" style="left: 221px;" data-note="" data-char="18">18</div>
+                <div class="black-key" style="left: 254px;" data-note="" data-char="b">b</div>
+                <div class="black-key" style="left: 287px;" data-note="14.mp3" data-char="14">14</div>
+                <div class="black-key" style="left: 320px;" data-note="13.mp3" data-char="d">d</div>
+                <div class="black-key" style="left: 353px;" data-note="16.mp3" data-char="16">16</div>
+                <div class="black-key" style="left: 386px;" data-note="13.mp3" data-char="d">e</div>
+                <div class="black-key" style="left: 430px;" data-note="16.mp3" data-char="16">f</div>
+            </div>
+        </div>
+        
+        <button id="login">login</button>
+        <p id="message"></p>
+    </div>
+
+    <script>
+        const correctPassword = "1234567891011121314";
+        const messageElement = document.getElementById('message');
+        let enteredPassword = "";
+        const musicNotes = ['♪', '♫', '♬', '♩', '♭', '♮'];
+        
+        const pianoKeys = document.querySelectorAll('.key, .black-key');
+        
+        function createStars() {
+            const starCount = window.innerWidth < 768 ? 200 : 500; // Fewer stars on mobile
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.top = Math.random() * 100 + 'vh';
+                star.style.left = Math.random() * 100 + 'vw';
+                star.style.animationDelay = Math.random() * 10 + 's';
+                document.body.appendChild(star);
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', createStars);
+        
+        // Recreate stars on resize for responsive behavior
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                // Remove existing stars
+                document.querySelectorAll('.star').forEach(star => star.remove());
+                // Create new stars
+                createStars();
+            }, 250);
+        });
+        
+        function createMusicNote(x, y) {
+            const note = document.createElement('div');
+            note.className = 'music-note';
+            note.textContent = musicNotes[Math.floor(Math.random() * musicNotes.length)];
+            note.style.left = x + 'px';
+            note.style.top = y + 'px';
+            
+            const randomX = (Math.random() - 0.5) * 100;
+            note.style.setProperty('--translateX', `${randomX}px`);
+            note.style.setProperty('--rotation', `${Math.random() * 360}deg`);
+            
+            document.body.appendChild(note);
+            
+            note.addEventListener('animationend', () => {
+                note.remove();
+            });
+        }
+        
+        function playSound(note, event) {
+            if (note) {
+                const audio = new Audio(note);
+                audio.play().catch(error => {
+                    console.error("Error playing sound:", error);
+                });
+            }
+            
+            const key = event.target.closest('.key, .black-key');
+            const rect = key.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top;
+            
+            // Fewer notes on mobile for better performance
+            const noteCount = window.innerWidth < 768 ? 2 : 3;
+            for (let i = 0; i < noteCount; i++) {
+                setTimeout(() => {
+                    createMusicNote(centerX, centerY);
+                }, i * 100);
+            }
+        }
+        
+        pianoKeys.forEach(key => {
+            key.addEventListener('click', (event) => {
+                event.preventDefault(); // Prevent any default behavior
+                const note = key.getAttribute('data-note');
+                const char = key.getAttribute('data-char');
+                playSound(note, event);
+                enteredPassword += char;
+                console.log(enteredPassword);
+            });
+            
+            // Add touch event listeners for better mobile experience
+            key.addEventListener('touchstart', (event) => {
+                event.preventDefault();
+                key.style.background = key.classList.contains('black-key') ? '#b4bd97' : '#b4bd97';
+            });
+            
+            key.addEventListener('touchend', (event) => {
+                event.preventDefault();
+                key.style.background = key.classList.contains('black-key') ? '#000' : '#fff';
+                
+                const note = key.getAttribute('data-note');
+                const char = key.getAttribute('data-char');
+                playSound(note, event);
+                enteredPassword += char;
+                console.log(enteredPassword);
+            });
+        });
+        
+        document.getElementById('login').addEventListener('click', () => {
+            if (enteredPassword === correctPassword) {
+                console.log("Correct password entered");
+                console.log("Current URL:", window.location.href);
+                console.log("Attempting to redirect to: candle.html");
+                
+                try {
+                    window.location.href = 'candle.html';
+                    window.location.replace('candle.html');
+                    document.location.href = 'candle.html';
+                } catch (error) {
+                    console.error("Redirection error:", error);
+                    alert("Redirection failed: " + error.message);
+                }
+            } else {
+                messageElement.textContent = "Incorrect Password!";
+                messageElement.classList.remove('correct');
+            }
+            enteredPassword = "";
+        });
+        
+        // Prevent zoom on double tap for iOS
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+</html>

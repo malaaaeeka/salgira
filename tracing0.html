@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Tracing</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Playfair Display', serif;
+            background-color: #86465e;
+            user-select: none;
+            cursor: url('https://i.imgur.com/C7F3yQO.png'), auto;
+            overflow: hidden;
+            position: relative;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap');
+
+        .background-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .login-container {
+            text-align: center;
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+
+        #traceSentence {
+            font-size: 6vw; /* Slightly larger font size for better fit */
+            letter-spacing: 5px;
+            max-width: 100%; /* Ensure no overflow */
+            margin: 0 auto;
+            text-align: center;
+            white-space: nowrap; /* Prevent line breaks */
+            display: inline-block; /* Helps to keep text in one line */
+        }
+
+        #traceGuide {
+            margin-top: 20px;
+            color: #a58e97;
+        }
+
+        .traced {
+            color: #ce98ac;
+            text-shadow: #86465e;
+        }
+
+        .untraced {
+            color: #b4bd9725;
+        }
+
+        svg path {
+            fill: none;
+            stroke:#eae0e0 ;
+            stroke-width: 1;
+        }
+
+        /* Responsive text size adjustments */
+        @media (min-width: 600px) {
+            #traceSentence {
+                font-size: 5vw;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            #traceSentence {
+                font-size: 4vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <svg width="100%" height="100%" viewBox="0 0 1000 1000">
+            <script>
+                function generateDiagonalPath(startOffset, amplitude, frequency) {
+                    let path = `M ${-200 + startOffset} 1200`;
+                    for (let t = 0; t <= 1500; t += 10) {
+                        const x = -200 + startOffset + t;
+                        const y = 1200 - t;
+                        const wave = amplitude * Math.sin(t * frequency / 200);
+                        const adjustedX = x + wave;
+                        const adjustedY = y + wave;
+                        path += ` L ${adjustedX} ${adjustedY}`;
+                    }
+                    return path;
+                }
+
+                for (let i = 0; i < 20; i++) {
+                    const startOffset = i * 80;
+                    const amplitude = 15 + Math.random() * 10;
+                    const frequency = 1 + Math.random() * 0.5;
+                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    path.setAttribute("d", generateDiagonalPath(startOffset, amplitude, frequency));
+                    path.setAttribute("stroke", "#2a2a2a");
+                    path.setAttribute("stroke-width", "1");
+                    path.setAttribute("fill", "none");
+                    document.querySelector("svg").appendChild(path);
+                }
+            </script>
+        </svg>
+    </div>
+
+    <div class="login-container">
+        <p id="traceSentence">Happy Birthday B</p>
+        <p id="traceGuide">Drag your cursor or touch over the text to trace it</p>
+    </div>
+
+    <script>
+        const sentence = document.getElementById('traceSentence');
+        const text = sentence.textContent.trim();
+        let currentIndex = 0;
+        let isTracing = false;
+
+        sentence.innerHTML = [...text].map(char => `<span class="untraced">${char}</span>`).join('');
+        const spans = Array.from(sentence.querySelectorAll('span'));
+
+        function startTracing(e) {
+            isTracing = true;
+            resetHighlights();
+            e.preventDefault();
+        }
+
+        function traceCharacter(e) {
+            if (!isTracing || currentIndex >= spans.length) return;
+
+            const touch = e.touches ? e.touches[0] : e;
+            const x = touch.clientX;
+            const y = touch.clientY;
+
+            const currentChar = spans[currentIndex];
+            const rect = currentChar.getBoundingClientRect();
+            if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                currentChar.classList.remove('untraced');
+                currentChar.classList.add('traced');
+                currentIndex++;
+            }
+
+            if (currentIndex === spans.length) {
+                isTracing = false;
+                setTimeout(() => {
+                    window.location.href = 'tracing1.html'; // Redirect to second page after 2 seconds
+                }, 2000); // 2 seconds delay
+            }
+        }
+
+        function stopTracing() {
+            isTracing = false;
+        }
+
+        function resetHighlights() {
+            spans.forEach(span => {
+                span.classList.remove('traced');
+                span.classList.add('untraced');
+            });
+            currentIndex = 0;
+        }
+
+        sentence.addEventListener('mousedown', startTracing);
+        sentence.addEventListener('mousemove', traceCharacter);
+        document.addEventListener('mouseup', stopTracing);
+
+        sentence.addEventListener('touchstart', startTracing);
+        sentence.addEventListener('touchmove', traceCharacter);
+        document.addEventListener('touchend', stopTracing);
+    </script>
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+    <title>Pink Raindrop Effect</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        body {
+            position: fixed;
+            width: 100%;
+        }
+        
+        canvas {
+            display: block;
+            cursor: none;
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        window.onload = function() {
+            var canvas = document.getElementById('canvas'),
+                ctx = canvas.getContext('2d'),
+                canvasW = canvas.width = window.innerWidth,
+                canvasH = canvas.height = window.innerHeight,
+                canvasWHalf = canvasW / 2,
+                canvasHHalf = canvasH / 2,
+                xoff = canvasWHalf - 306,
+                yoff = 50,
+                bg = '86465e', // Custom pink/mauve background
+                id = 0,
+                raindrops = [],
+                minSize = 1,
+                maxSize = 4,
+                minSpeed = 5,
+                maxSpeed = 20,
+                minHue = 300, // Pink range start
+                maxHue = 340, // Pink range end
+                maxAmount = 50,
+                lastTouch = { x: 0, y: 0 },
+                devicePixelRatio = window.devicePixelRatio || 1;
+
+            // Adjust settings based on device performance
+            function setDeviceSettings() {
+                var width = window.innerWidth;
+                var height = window.innerHeight;
+                
+                // Reduce particles on smaller/slower devices
+                if (width <= 480) {
+                    maxAmount = 25;
+                } else if (width <= 768) {
+                    maxAmount = 35;
+                } else if (width <= 1024) {
+                    maxAmount = 40;
+                } else {
+                    maxAmount = 50;
+                }
+            }
+
+            function setupCanvas() {
+                // High DPI support for crisp rendering
+                var rect = canvas.getBoundingClientRect();
+                canvas.width = rect.width * devicePixelRatio;
+                canvas.height = rect.height * devicePixelRatio;
+                ctx.scale(devicePixelRatio, devicePixelRatio);
+                
+                canvas.style.width = rect.width + 'px';
+                canvas.style.height = rect.height + 'px';
+                
+                canvasW = rect.width;
+                canvasH = rect.height;
+                canvasWHalf = canvasW / 2;
+                canvasHHalf = canvasH / 2;
+                xoff = canvasWHalf - 306;
+            }
+
+            function random(min, max) {
+                if (arguments.length < 2) {
+                    max = min;
+                    min = 0;
+                }
+                return Math.floor(Math.random() * (max - min) + min);
+            }
+
+            function hexToRGB(hex, opacity) {
+                var rgb = '';
+                hex.match(/.{2}/g).forEach(function(n) {
+                    rgb += (parseInt(n, 16)) + ',';
+                });
+                return 'rgba(' + rgb + opacity + ')';
+            }
+
+            // Keep your original heart design exactly as is
+            function draw() {
+                ctx.fillStyle = hexToRGB(bg, '0.3');
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(canvasWHalf, 0);
+                ctx.lineTo(304 + xoff, 97 + yoff);
+                ctx.bezierCurveTo(282 + xoff, -5 + yoff, 80 + xoff, -6 + yoff, 76 + xoff, 165 + yoff);
+                ctx.bezierCurveTo(74 + xoff, 251 + yoff, 184 + xoff, 300 + yoff, 304 + xoff, 447 + yoff);
+                ctx.lineTo(canvasWHalf, canvasH);
+                ctx.lineTo(0, canvasH);
+                ctx.moveTo(canvasW, 0);
+                ctx.lineTo(canvasWHalf, 0);
+                ctx.lineTo(304 + xoff, 97 + yoff);
+                ctx.bezierCurveTo(326 + xoff, 5 + yoff, 528 + xoff, 6 + yoff, 532 + xoff, 165 + yoff);
+                ctx.bezierCurveTo(534 + xoff, 251 + yoff, 424 + xoff, 300 + yoff, 304 + xoff, 447 + yoff);
+                ctx.lineTo(canvasWHalf, canvasH);
+                ctx.lineTo(canvasW, canvasH);
+                ctx.closePath();
+                ctx.fill();
+
+                for (var i = 1; i < id; i++) {
+                    if (raindrops[i]) {
+                        raindrops[i].fall();
+                    }
+                }
+            }
+
+            var Raindrop = function() {
+                id++;
+                this.y = random(-canvasH);
+                this.x = random(canvasW);
+                this.size = random(minSize, maxSize);
+                this.speed = random(minSpeed, maxSpeed);
+                this.color = 'hsl(' + random(minHue, maxHue) + ',70%,60%)'; // Pink with good saturation and lightness
+                this.origColor = this.color;
+                this.id = id;
+                raindrops[id] = this;
+            };
+
+            Raindrop.prototype.fall = function() {
+                this.y += this.speed;
+                if (this.y >= canvasH) {
+                    this.y = random(-canvasH);
+                    this.x = random(canvasW);
+                }
+                ctx.save();
+                ctx.beginPath();
+                var gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+                gradient.addColorStop(0, '#ffb3d9'); // Light pink center
+                gradient.addColorStop(0.5, this.color);
+                gradient.addColorStop(1, hexToRGB(bg, 0));
+                ctx.rect(this.x, this.y, this.size, maxSpeed);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                ctx.closePath();
+                ctx.restore();
+            };
+
+            function init() {
+                setDeviceSettings();
+                setupCanvas();
+                
+                ctx.fillStyle = '#' + bg;
+                ctx.fillRect(0, 0, canvasW, canvasH);
+                
+                // Reset raindrops
+                raindrops = [];
+                id = 0;
+                
+                for (var i = 0; i < maxAmount; i++) {
+                    new Raindrop();
+                }
+            }
+
+            function animate() {
+                draw();
+                requestAnimationFrame(animate);
+            }
+
+            function mouseTrail(x, y) {
+                ctx.save();
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.fillStyle = 'rgba(255, 182, 193, 0.3)'; // Light pink mouse/touch trail
+                ctx.beginPath();
+                // Scale trail size for mobile
+                var trailSize = canvasW <= 768 ? 30 : 50;
+                ctx.arc(x, y, trailSize, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Enhanced mouse events for desktop
+            canvas.addEventListener('mousemove', function(e) {
+                var rect = canvas.getBoundingClientRect();
+                var x = (e.clientX - rect.left) * (canvasW / rect.width);
+                var y = (e.clientY - rect.top) * (canvasH / rect.height);
+                mouseTrail(x, y);
+            });
+
+            // Enhanced touch events for mobile
+            function getTouchPos(e) {
+                var rect = canvas.getBoundingClientRect();
+                return {
+                    x: (e.touches[0].clientX - rect.left) * (canvasW / rect.width),
+                    y: (e.touches[0].clientY - rect.top) * (canvasH / rect.height)
+                };
+            }
+
+            canvas.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                var pos = getTouchPos(e);
+                lastTouch.x = pos.x;
+                lastTouch.y = pos.y;
+                mouseTrail(pos.x, pos.y);
+            }, { passive: false });
+
+            canvas.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+                var pos = getTouchPos(e);
+                lastTouch.x = pos.x;
+                lastTouch.y = pos.y;
+                mouseTrail(pos.x, pos.y);
+            }, { passive: false });
+
+            canvas.addEventListener('touchend', function(e) {
+                e.preventDefault();
+            }, { passive: false });
+
+            // Handle orientation changes and resize
+            var resizeTimeout;
+            function resizeCanvas() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(function() {
+                    init();
+                }, 150);
+            }
+
+            window.addEventListener('resize', resizeCanvas);
+            window.addEventListener('orientationchange', function() {
+                setTimeout(init, 200);
+            });
+
+            // Prevent zoom on double tap (iOS)
+            var lastTouchEnd = 0;
+            document.addEventListener('touchend', function(e) {
+                var now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    e.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+
+            // Prevent context menu on long press
+            canvas.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+
+            // Initialize
+            init();
+            requestAnimationFrame(animate);
+
+            // Auto-redirect after 10 seconds (commented out - remove comment if needed)
+            setTimeout(() => {
+                window.location.href = "";
+            }, 10000);
+        };
+    </script>
+</body>
+</html>

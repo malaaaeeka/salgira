@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magnifying Glass Secret Message</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #86465e;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            position: relative;
+        }
+
+        .background-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            cursor: none;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hidden-message {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 2vw; /* Scalable font size */
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+            border-radius: 10px;
+            white-space: pre-line;
+            padding: 20px;
+        }
+
+        .magnifier {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            pointer-events: none;
+            overflow: hidden;
+            transform: translate(-50%, -50%);
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .magnifier .reveal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            mix-blend-mode: lighten;
+        }
+        
+        svg path {
+            fill: none;
+            stroke: white;
+            stroke-width: 1;
+        }
+
+        @media (max-width: 600px) {
+            .hidden-message {
+                font-size: 4vw; /* Adjust font size for smaller screens */
+            }
+        }
+
+        @media (max-width: 400px) {
+            .hidden-message {
+                font-size: 5vw; /* Further adjust font size for very small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <svg width="100%" height="100%" viewBox="0 0 1000 1000">
+            <!-- Path generation script for background -->
+            <script type="text/javascript">
+                function generateDiagonalPath(startOffset, amplitude, frequency) {
+                    let path = `M ${-200 + startOffset} 1200`;
+                    for (let t = 0; t <= 1500; t += 10) {
+                        const x = -200 + startOffset + t;
+                        const y = 1200 - t;
+                        const wave = amplitude * Math.sin(t * frequency / 200);
+                        const adjustedX = x + wave;
+                        const adjustedY = y + wave;
+                        path += ` L ${adjustedX} ${adjustedY}`;
+                    }
+                    return path;
+                }
+
+                for (let i = 0; i < 20; i++) {
+                    const startOffset = i * 80;
+                    const amplitude = 15 + Math.random() * 10;
+                    const frequency = 1 + Math.random() * 0.5;
+                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    path.setAttribute("d", generateDiagonalPath(startOffset, amplitude, frequency));
+                    path.setAttribute("stroke", "#2a2a2a");
+                    path.setAttribute("stroke-width", "1");
+                    path.setAttribute("fill", "none");
+                    document.querySelector("svg").appendChild(path);
+                }
+            </script>
+        </svg>
+    </div>
+
+    <div class="container">
+        <div class="hidden-message" id="hiddenMessage">
+         iloveyoualways<3.
+        </div>
+        <div class="magnifier">
+            <div class="reveal"></div>
+        </div>
+    </div>
+
+    <script>
+        const magnifier = document.querySelector('.magnifier');
+        const hiddenMessage = document.getElementById('hiddenMessage');
+        const container = document.querySelector('.container');
+
+        // Wait for 3 seconds before showing the text
+        setTimeout(() => {
+            hiddenMessage.style.opacity = 1; // Reveal the message with a fade-in effect
+        }, 3000);
+
+        // Redirect after 15 seconds
+        setTimeout(() => {
+            // Replace 'https://example.com' with your target URL
+            window.location.href = 'heart.html';
+        }, 15000);
+
+        // Handle mouse movement
+        container.addEventListener('mousemove', (event) => {
+            const containerRect = container.getBoundingClientRect();
+            const x = event.clientX - containerRect.left;
+            const y = event.clientY - containerRect.top;
+
+            magnifier.style.left = `${x}px`;
+            magnifier.style.top = `${y}px`;
+
+            // Correcting the clip-path calculation relative to the container
+            hiddenMessage.style.setProperty('clip-path', `circle(80px at ${x}px ${y}px)`);
+        });
+
+        // Handle touch movement for mobile compatibility
+        container.addEventListener('touchmove', (event) => {
+            const containerRect = container.getBoundingClientRect();
+            const x = event.touches[0].clientX - containerRect.left;
+            const y = event.touches[0].clientY - containerRect.top;
+
+            magnifier.style.left = `${x}px`;
+            magnifier.style.top = `${y}px`;
+
+            // Correcting the clip-path calculation relative to the container
+            hiddenMessage.style.setProperty('clip-path', `circle(80px at ${x}px ${y}px)`);
+        });
+    </script>
+</body>
+</html>

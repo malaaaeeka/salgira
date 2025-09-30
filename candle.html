@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Candle Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #86465e;
+            height: 100vh;
+            height: 100dvh; /* Dynamic viewport height for mobile */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            opacity: 0;
+            transition: opacity 3s ease-in;
+            perspective: 1000px;
+            position: relative;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #86465e, #86465e);
+            opacity: 0;
+            transition: opacity 3s ease-in;
+            transition-delay: 2s;
+        }
+
+        .star {
+            position: absolute;
+            opacity: 0;
+            transition: opacity 2s ease-in;
+        }
+
+        .star::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, #fff 0%, rgba(255,255,255,0.8) 50%, transparent 100%);
+            border-radius: 50%;
+        }
+
+        .star::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #fff, transparent);
+            transform: rotate(45deg);
+            filter: blur(1px);
+        }
+
+        .star-twinkle {
+            animation: twinkle var(--twinkle-duration) infinite alternate ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0% {
+                transform: scale(0.8);
+                filter: blur(1px) brightness(0.8);
+            }
+            50% {
+                transform: scale(1.2);
+                filter: blur(0.5px) brightness(1.2);
+            }
+            100% {
+                transform: scale(1);
+                filter: blur(0.8px) brightness(1);
+            }
+        }
+
+        .shooting-star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            opacity: 0;
+            background: linear-gradient(90deg, 
+                rgba(255,255,255,0.8), 
+                rgba(255,255,255,0.4) 20%,
+                transparent 100%);
+            filter: blur(0.5px);
+            transform: rotate(45deg);
+        }
+
+        @keyframes shoot {
+            0% {
+                transform: translateX(0) translateY(0) rotate(45deg) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(-100vw) translateY(100vh) rotate(45deg) scale(0.2);
+                opacity: 0;
+            }
+        }
+
+        #candle {
+            position: absolute;
+            width: clamp(80px, 15vw, 120px);
+            height: clamp(160px, 30vw, 240px);
+            cursor: pointer;
+            z-index: 100;
+            opacity: 0;
+            transform-style: preserve-3d;
+            transform: translateY(20px) translateX(-50%);
+            transition: all 1.5s ease-out;
+            left: 50%;
+            transform-origin: center;
+        }
+
+        /* Mobile specific adjustments */
+        @media (max-width: 768px) {
+            #candle {
+                width: clamp(60px, 20vw, 100px);
+                height: clamp(120px, 40vw, 200px);
+            }
+        }
+
+        /* Very small screens */
+        @media (max-width: 480px) {
+            #candle {
+                width: clamp(50px, 25vw, 80px);
+                height: clamp(100px, 50vw, 160px);
+            }
+        }
+
+        @keyframes moveRight {
+            0% {
+                transform: translateX(-50%) rotate(0deg);
+            }
+            100% {
+                transform: translateX(calc(100vw - 50px)) rotate(360deg);
+            }
+        }
+
+        #candle.blown {
+            animation: moveRight 2s ease-out forwards;
+        }
+
+        .flame {
+            position: absolute;
+            top: clamp(-15px, -3vw, -25px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: clamp(20px, 5vw, 35px);
+            height: clamp(40px, 10vw, 70px);
+            background: linear-gradient(to bottom, #ff6b00, #ff9800);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: flicker 0.5s infinite alternate;
+            box-shadow: 
+                0 0 clamp(15px, 3vw, 25px) #ff6b00,
+                0 0 clamp(30px, 6vw, 50px) #ff9800,
+                0 0 clamp(45px, 9vw, 75px) #ffeb3b,
+                0 0 clamp(60px, 12vw, 100px) rgba(255, 107, 0, 0.3);
+        }
+
+        @keyframes flicker {
+            0% { transform: translateX(-50%) scale(0.85) rotate(-2deg); filter: brightness(0.9); }
+            50% { transform: translateX(-50%) scale(1) rotate(2deg); filter: brightness(1.1); }
+            100% { transform: translateX(-50%) scale(0.95) rotate(-1deg); filter: brightness(1); }
+        }
+
+        .stick {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: clamp(15px, 3vw, 25px);
+            height: clamp(100px, 20vw, 160px);
+            background: linear-gradient(to right, #d4b483, #e6ccb2, #d4b483);
+            border-radius: clamp(7px, 1.5vw, 12px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .instruction {
+            position: fixed;
+            bottom: clamp(20px, 5vh, 50px);
+            color: #fff;
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 2s ease-in, transform 1s ease-out;
+            transition-delay: 4s;
+            width: 100%;
+            padding: 0 20px;
+            line-height: 1.4;
+        }
+
+        /* Mobile touch feedback */
+        @media (hover: none) and (pointer: coarse) {
+            .instruction {
+                font-size: clamp(0.9rem, 5vw, 1.2rem);
+            }
+            
+            #candle {
+                touch-action: manipulation;
+            }
+        }
+
+        /* Landscape mobile adjustments */
+        @media (max-height: 500px) and (orientation: landscape) {
+            #candle {
+                width: clamp(50px, 12vh, 80px);
+                height: clamp(100px, 24vh, 160px);
+            }
+            
+            .flame {
+                top: clamp(-10px, -2vh, -15px);
+                width: clamp(15px, 4vh, 25px);
+                height: clamp(30px, 8vh, 50px);
+            }
+            
+            .stick {
+                width: clamp(12px, 3vh, 20px);
+                height: clamp(80px, 20vh, 130px);
+            }
+            
+            .instruction {
+                bottom: clamp(10px, 3vh, 25px);
+                font-size: clamp(0.8rem, 3vh, 1rem);
+            }
+        }
+
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .star::before {
+                filter: blur(0.5px);
+            }
+        }
+
+        /* Reduce motion for accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            .star-twinkle {
+                animation: none;
+            }
+            
+            .flame {
+                animation-duration: 2s;
+            }
+            
+            .shooting-star {
+                animation-duration: 3s;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+    <div id="candle">
+        <div class="flame"></div>
+        <div class="stick"></div>
+    </div>
+    <div class="instruction">Blow The Candle<br><small style="opacity: 0.7; font-size: 0.8em;">or tap if microphone unavailable</small></div>
+
+    <script>
+        // Change this URL to your desired redirect destination
+        const REDIRECT_URL = 'heart.html'; // Replace with your target page URL
+        
+        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        let microphoneAvailable = false;
+        let candleBlown = false;
+        
+        window.addEventListener('load', () => {
+            document.body.style.opacity = 1;
+            document.querySelector('.bg-gradient').style.opacity = 1;
+            
+            setTimeout(() => {
+                document.getElementById('candle').style.opacity = 1;
+                document.getElementById('candle').style.transform = 'translateY(0) translateX(-50%)';
+                document.querySelector('.instruction').style.opacity = 0.8;
+                document.querySelector('.instruction').style.transform = 'translateY(0)';
+            }, 5000);
+            
+            setTimeout(createStars, 3000);
+        });
+
+        function createStars() {
+            // Adjust star count based on device performance
+            const starCount = isMobile ? 100 : 200;
+            
+            for (let i = 0; i < starCount; i++) {
+                setTimeout(() => {
+                    const star = document.createElement('div');
+                    star.className = 'star star-twinkle';
+                    const size = Math.random() * (isMobile ? 2 : 3) + 1;
+                    star.style.width = size + 'px';
+                    star.style.height = size + 'px';
+                    star.style.left = Math.random() * 100 + 'vw';
+                    star.style.top = Math.random() * 100 + 'vh';
+                    star.style.setProperty('--twinkle-duration', 2 + Math.random() * 3 + 's');
+                    document.body.appendChild(star);
+                    
+                    requestAnimationFrame(() => {
+                        star.style.opacity = 0.7 + Math.random() * 0.3;
+                    });
+                }, i * (isMobile ? 40 : 20));
+            }
+
+            setTimeout(startShootingStars, 4000);
+        }
+
+        function createShootingStar() {
+            const star = document.createElement('div');
+            star.className = 'shooting-star';
+            star.style.top = Math.random() * window.innerHeight/2 + 'px';
+            star.style.right = '0';
+            star.style.animation = 'shoot 1.5s linear forwards';
+            document.body.appendChild(star);
+
+            star.addEventListener('animationend', () => {
+                star.remove();
+            });
+        }
+
+        function startShootingStars() {
+            // Reduce shooting star frequency on mobile
+            const interval = isMobile ? 6000 : 4000;
+            setInterval(createShootingStar, interval);
+        }
+
+        function blowCandle() {
+            if (candleBlown) return;
+            
+            candleBlown = true;
+            const flame = document.querySelector('.flame');
+            const candle = document.getElementById('candle');
+            const instruction = document.querySelector('.instruction');
+            
+            flame.style.animation = 'none';
+            flame.style.opacity = '0';
+            instruction.style.opacity = '0';
+            
+            candle.classList.add('blown');
+            
+            // Redirect after animation
+            setTimeout(() => {
+                window.location.href = 'tracing0.html';
+            }, 3000);
+        }
+
+        // Try to get microphone access
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    microphoneAvailable = true;
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const analyser = audioContext.createAnalyser();
+                    const microphone = audioContext.createMediaStreamSource(stream);
+                    microphone.connect(analyser);
+                    
+                    analyser.fftSize = 256;
+                    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+                    
+                    function checkAudio() {
+                        if (candleBlown) return;
+                        
+                        analyser.getByteFrequencyData(dataArray);
+                        const volume = dataArray.reduce((a, b) => a + b) / dataArray.length;
+                        
+                        // Adjust sensitivity for mobile devices
+                        const threshold = isMobile ? 30 : 50;
+                        
+                        if (volume > threshold) {
+                            blowCandle();
+                        }
+                        
+                        requestAnimationFrame(checkAudio);
+                    }
+                    
+                    // Start audio monitoring after candle appears
+                    setTimeout(() => {
+                        if (audioContext.state === 'suspended') {
+                            audioContext.resume();
+                        }
+                        checkAudio();
+                    }, 6000);
+                })
+                .catch(err => {
+                    console.error('Microphone access denied:', err);
+                    microphoneAvailable = false;
+                    
+                    // Update instruction text
+                    setTimeout(() => {
+                        const instruction = document.querySelector('.instruction');
+                        instruction.innerHTML = 'Tap the Candle to Continue<br><small style="opacity: 0.7; font-size: 0.8em;">Microphone access unavailable</small>';
+                    }, 6000);
+                });
+        }
+
+        // Touch/click fallback
+        document.getElementById('candle').addEventListener('click', blowCandle);
+        document.getElementById('candle').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            blowCandle();
+        });
+
+        // Handle orientation changes
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                // Trigger a reflow to handle viewport changes
+                const candle = document.getElementById('candle');
+                candle.style.transform = candle.style.transform;
+            }, 100);
+        });
+
+        // Prevent zoom on double tap
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        });
+
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+        
+    </script>
+</body>
+</html>
