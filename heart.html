@@ -69,20 +69,11 @@
                 var width = window.innerWidth;
                 var height = window.innerHeight;
                 
-                // More aggressive reduction for mobile devices
-                if (width <= 375) {
-                    // Very small phones
-                    maxAmount = 15;
-                    minSpeed = 3;
-                    maxSpeed = 12;
-                } else if (width <= 480) {
-                    // Small phones
-                    maxAmount = 20;
-                    minSpeed = 4;
-                    maxSpeed = 15;
+                // Reduce particles on smaller/slower devices
+                if (width <= 480) {
+                    maxAmount = 25;
                 } else if (width <= 768) {
-                    // Tablets
-                    maxAmount = 30;
+                    maxAmount = 35;
                 } else if (width <= 1024) {
                     maxAmount = 40;
                 } else {
@@ -104,38 +95,7 @@
                 canvasH = rect.height;
                 canvasWHalf = canvasW / 2;
                 canvasHHalf = canvasH / 2;
-                
-                // Much more aggressive responsive scaling for mobile
-                var scale;
-                if (canvasW <= 480) {
-                    // Small phones
-                    scale = canvasW / 650;
-                } else if (canvasW <= 768) {
-                    // Tablets and larger phones
-                    scale = canvasW / 750;
-                } else {
-                    // Desktop
-                    scale = Math.min(canvasW / 800, canvasH / 600);
-                    scale = Math.min(scale, 1.2);
-                }
-                
-                // Ensure minimum visibility
-                scale = Math.max(scale, 0.3);
-                
-                // Center the heart horizontally with scaled offset
-                xoff = canvasWHalf - (306 * scale);
-                
-                // Adjust vertical offset based on screen height
-                if (canvasH <= 600) {
-                    yoff = 20 * scale;
-                } else if (canvasH <= 800) {
-                    yoff = 40 * scale;
-                } else {
-                    yoff = 50 * scale;
-                }
-                
-                // Store scale globally
-                window.heartScale = scale;
+                xoff = canvasWHalf - 306;
             }
 
             function random(min, max) {
@@ -158,25 +118,18 @@
             function draw() {
                 ctx.fillStyle = hexToRGB(bg, '0.3');
                 ctx.beginPath();
-                
-                // Use scale for responsive heart
-                var s = window.heartScale || 1;
-                var x = xoff;
-                var y = yoff;
-                
-                // Scale all coordinates
                 ctx.moveTo(0, 0);
                 ctx.lineTo(canvasWHalf, 0);
-                ctx.lineTo((304 * s) + x, (97 * s) + y);
-                ctx.bezierCurveTo((282 * s) + x, (-5 * s) + y, (80 * s) + x, (-6 * s) + y, (76 * s) + x, (165 * s) + y);
-                ctx.bezierCurveTo((74 * s) + x, (251 * s) + y, (184 * s) + x, (300 * s) + y, (304 * s) + x, (447 * s) + y);
+                ctx.lineTo(304 + xoff, 97 + yoff);
+                ctx.bezierCurveTo(282 + xoff, -5 + yoff, 80 + xoff, -6 + yoff, 76 + xoff, 165 + yoff);
+                ctx.bezierCurveTo(74 + xoff, 251 + yoff, 184 + xoff, 300 + yoff, 304 + xoff, 447 + yoff);
                 ctx.lineTo(canvasWHalf, canvasH);
                 ctx.lineTo(0, canvasH);
                 ctx.moveTo(canvasW, 0);
                 ctx.lineTo(canvasWHalf, 0);
-                ctx.lineTo((304 * s) + x, (97 * s) + y);
-                ctx.bezierCurveTo((326 * s) + x, (5 * s) + y, (528 * s) + x, (6 * s) + y, (532 * s) + x, (165 * s) + y);
-                ctx.bezierCurveTo((534 * s) + x, (251 * s) + y, (424 * s) + x, (300 * s) + y, (304 * s) + x, (447 * s) + y);
+                ctx.lineTo(304 + xoff, 97 + yoff);
+                ctx.bezierCurveTo(326 + xoff, 5 + yoff, 528 + xoff, 6 + yoff, 532 + xoff, 165 + yoff);
+                ctx.bezierCurveTo(534 + xoff, 251 + yoff, 424 + xoff, 300 + yoff, 304 + xoff, 447 + yoff);
                 ctx.lineTo(canvasWHalf, canvasH);
                 ctx.lineTo(canvasW, canvasH);
                 ctx.closePath();
